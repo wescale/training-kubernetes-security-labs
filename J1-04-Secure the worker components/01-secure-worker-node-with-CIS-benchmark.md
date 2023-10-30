@@ -166,10 +166,22 @@ either via the --pod-max-pids command line parameter or the PodPidsLimit configu
 
 
 FIX 4.1.1
+FIX 4.1.7 (tips : find the localtion of --client-ca-file with ```sudo more /var/lib/kubelet/config.yaml | grep clientCAFile```) 
+FIX 4.1.9
 
 then check
 
 ```sh
-sudo kube-bench run --targets=node --version=1.27 | grep 4.1.1
+sudo kube-bench run --targets=node --version=1.27 | grep 4.1.
+  [INFO] 4.1 Worker Node Configuration Files
   [PASS] 4.1.1 Ensure that the kubelet service file permissions are set to 600 or more restrictive (Automated)
+  [PASS] 4.1.2 Ensure that the kubelet service file ownership is set to root:root (Automated)
+  [PASS] 4.1.3 If proxy kubeconfig file exists ensure permissions are set to 600 or more restrictive (Manual)
+  [PASS] 4.1.4 If proxy kubeconfig file exists ensure ownership is set to root:root (Manual)
+  [PASS] 4.1.5 Ensure that the --kubeconfig kubelet.conf file permissions are set to 600 or more restrictive (Automated)
+  [PASS] 4.1.6 Ensure that the --kubeconfig kubelet.conf file ownership is set to root:root (Automated)
+  [PASS] 4.1.7 Ensure that the certificate authorities file permissions are set to 600 or more restrictive (Manual)
+  [PASS] 4.1.8 Ensure that the client certificate authorities file ownership is set to root:root (Manual)
+  [PASS] 4.1.9 If the kubelet config.yaml configuration file is being used validate permissions set to 600 or more restrictive (Manual)
+  [PASS] 4.1.10 If the kubelet config.yaml configuration file is being used validate file ownership is set to root:root (Manual)
 ```sh
