@@ -31,14 +31,27 @@
 
 ## 1.1 Control Plane Node Configuration Files
 
-FIX **1.1.12** Ensure that the etcd data directory ownership is set to etcd:etcd
+FIX :
+- 1.1.12 : Ensure that the etcd data directory ownership is set to etcd:etcd
 
 ## 1.2 API Server
 
+FIX :
+- 1.2.5
+- 1.2.17 
+- 1.2.18
+- 1.2.19
+- 1.2.20
+- 1.2.21
 
+
+<details>
+  <summary>solution</summary>
+  
 ```sh
 
 sudo vi /etc/kubernetes/manifests/kube-apiserver.yaml
+
     - --kubelet-certificate-authority=/etc/kubernetes/pki/ca.crt # fix CIS 1.2.5
     - --profiling=false  # fix CIS 1.2.17 
     - --audit-log-path=/etc/kubernetes/audit/logs/audit.log # fix CIS 1.2.18
@@ -46,14 +59,19 @@ sudo vi /etc/kubernetes/manifests/kube-apiserver.yaml
     - --audit-log-maxbackup=10 # fix CIS 1.2.20  
     - --audit-log-maxsize=100 # fix CIS 1.2.21
 
-
 ```
 
+</details>
 
 ## 1.3 Controller Manager
 
+FIX :
+- 1.3.2
 
 edit ```/etc/kubernetes/manifests/kube-controller-manager.yaml``` to add ```--profiling=false``` option on the command
+
+<details>
+  <summary>solution</summary>
 
 ```sh
 
@@ -88,13 +106,20 @@ sudo kube-bench run --targets=master | grep 1.3.2
 
 ```
 
+</details>
+
 ## 1.4 Scheduler
 
-Fix  1.4.1 Ensure that the --profiling argument is set to false (Automated)
+Fix :
+- 1.4.1 : Ensure that the --profiling argument is set to false (Automated)
 
 
 
 # SOLUTION
+
+<details>
+  <summary>solution</summary>
+
 
 ```sh
 
@@ -121,3 +146,5 @@ sudo vi /etc/kubernetes/manifests/kube-scheduler.yaml
     - --leader-elect=true
     - --profiling=false # Fix  1.4.1
 ```
+
+</details>
