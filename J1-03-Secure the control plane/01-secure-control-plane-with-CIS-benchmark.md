@@ -29,9 +29,29 @@
 [FAIL] 1.4.1 Ensure that the --profiling argument is set to false (Automated)
 ```
 
-## disable profiling
+## 1.1 Control Plane Node Configuration Files
 
-### controller-manager
+FIX **1.1.12** Ensure that the etcd data directory ownership is set to etcd:etcd
+
+## 1.2 API Server
+
+
+```sh
+
+sudo vi /etc/kubernetes/manifests/kube-apiserver.yaml
+    - --kubelet-certificate-authority=/etc/kubernetes/pki/ca.crt # fix CIS 1.2.5
+    - --profiling=false  # fix CIS 1.2.17 
+    - --audit-log-path=/etc/kubernetes/audit/logs/audit.log # fix CIS 1.2.18
+    - --audit-log-maxage=30 # fix CIS 1.2.19
+    - --audit-log-maxbackup=10 # fix CIS 1.2.20  
+    - --audit-log-maxsize=100 # fix CIS 1.2.21
+
+
+```
+
+
+## 1.3 Controller Manager
+
 
 edit ```/etc/kubernetes/manifests/kube-controller-manager.yaml``` to add ```--profiling=false``` option on the command
 
@@ -66,4 +86,38 @@ kubectl get pod -n kube-system
 sudo kube-bench run --targets=master | grep 1.3.2
   [PASS] 1.3.2 Ensure that the --profiling argument is set to false (Automated)
 
+```
+
+## 1.4 Scheduler
+
+Fix  1.4.1 Ensure that the --profiling argument is set to false (Automated)
+
+
+
+# SOLUTION
+
+```sh
+
+# 1.1.12 Ensure that the etcd data directory ownership is set to etcd:etcd
+# KO with kubeadm install this user doesn't exist
+sudo ps -ef | grep etcd | grep data-dir # find etcd data dir
+sudo groupadd etcd
+sudo useradd etcd -g etcd
+sudo chown etcd:etcd /var/lib/etcd
+
+
+
+# Fix  1.4.1 Ensure that the --profiling argument is set to false (Automated)
+# Edit the Scheduler pod specification file /etc/kubernetes/manifests/kube-scheduler.yaml file
+# on the control plane node and set the below parameter.
+# --profiling=false
+sudo vi /etc/kubernetes/manifests/kube-scheduler.yaml
+  - command:
+    - kube-scheduler
+    - --authentication-kubeconfig=/etc/kubernetes/scheduler.conf
+    - --authorization-kubeconfig=/etc/kubernetes/scheduler.conf
+    - --bind-address=127.0.0.1
+    - --kubeconfig=/etc/kubernetes/scheduler.conf
+    - --leader-elect=true
+    - --profiling=false # Fix  1.4.1
 ```
