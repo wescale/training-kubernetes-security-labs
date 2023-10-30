@@ -164,10 +164,9 @@ either via the --pod-max-pids command line parameter or the PodPidsLimit configu
 
 ```
 
-
-FIX 4.1.1
-FIX 4.1.7 (tips : find the localtion of --client-ca-file with ```sudo more /var/lib/kubelet/config.yaml | grep clientCAFile```) 
-FIX 4.1.9
+- FIX 4.1.1
+- FIX 4.1.7 (tips : find the localtion of --client-ca-file with ```sudo more /var/lib/kubelet/config.yaml | grep clientCAFile```) 
+- FIX 4.1.9
 
 then check
 
