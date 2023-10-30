@@ -20,7 +20,12 @@ sudo apt install ./kube-bench_${KUBE_BENCH_VERSION}_linux_amd64.deb -f
 
 ```sh
 sudo kube-bench run --targets=master
-
+```
+<details>
+  <summary>scan result example</summary>
+  
+```sh
+Warning: Kubernetes version was not auto-detected because kubectl could not connect to the Kubernetes server. This may be because the kubeconfig information is missing or has credentials that do not match the server. Assuming default version 1.18
 
 [INFO] 1 Control Plane Security Configuration
 [INFO] 1.1 Control Plane Node Configuration Files
@@ -204,6 +209,8 @@ on the control plane node and set the below parameter.
 0 checks INFO
 
 ```
+
+</details>
 
 ## Trivy
 
