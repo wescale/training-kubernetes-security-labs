@@ -39,10 +39,7 @@ FIX :
 FIX :
 - 1.2.5
 - 1.2.17 
-- 1.2.18
-- 1.2.19
-- 1.2.20
-- 1.2.21
+
 
 
 <details>
@@ -54,10 +51,6 @@ sudo vi /etc/kubernetes/manifests/kube-apiserver.yaml
 
     - --kubelet-certificate-authority=/etc/kubernetes/pki/ca.crt # fix CIS 1.2.5
     - --profiling=false  # fix CIS 1.2.17 
-    - --audit-log-path=/etc/kubernetes/audit/logs/audit.log # fix CIS 1.2.18
-    - --audit-log-maxage=30 # fix CIS 1.2.19
-    - --audit-log-maxbackup=10 # fix CIS 1.2.20  
-    - --audit-log-maxsize=100 # fix CIS 1.2.21
 
 ```
 
