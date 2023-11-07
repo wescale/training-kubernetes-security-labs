@@ -28,7 +28,8 @@ helm repo add aqua https://aquasecurity.github.io/helm-charts/
 
 helm install trivy-operator aqua/trivy-operator \
   --namespace trivy-system \
-  --create-namespace
+  --create-namespace \
+  --set compliance.cron='*/2 * * * *'
 ```
 
 Look at the pods created and inspect the associated CRDs in the aquasecurity.github.io APIGroup
