@@ -1,17 +1,16 @@
-# Install K8S cluster with kubeadm
+# Install K8S HA cluster with kubeadm
 
-## prerequesite allready installed for you
+<https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/high-availability/>
 
+## Prerequisites already installed for you
 
 <details>
-  <summary>prerequesite</summary>
-  
+  <summary>Prerequisites</summary>
+
 ```sh
 
 #!/bin/sh
 echo "setup hostname=$(hostname) ip=$(hostname -i)"
-
- 
 
 # install K8s pre-req
 
@@ -34,7 +33,7 @@ apt-get install -y vim nano
 modprobe overlay
 modprobe br_netfilter
 
-# ii. setup /etc/sysctl.d/99-kubernetes-cri.conf 
+# ii. setup /etc/sysctl.d/99-kubernetes-cri.conf
 cat > /etc/sysctl.d/99-kubernetes-cri.conf <<EOF
 net.bridge.bridge-nf-call-iptables  = 1
 net.ipv4.ip_forward                 = 1
@@ -62,7 +61,6 @@ echo \
   "$(. /etc/os-release && echo "$VERSION_CODENAME")" stable" | \
   sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
 ```
-
 
 ```sh
 sudo apt-get update
@@ -95,8 +93,8 @@ curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
 # 9.  Update with the new repo declared, which will download updated repo information.
 apt-get update
 
-# 10.  Install the software. There are regular releases, the newest of which can be used by omitting the equal sign and version information on the command line. Historically new versions have lots of changes and a good chance of a bug or five. As a result we will hold the software at the recent but stable version we install. 
-# In a later lab we will update the cluster to a newer version. 
+# 10.  Install the software. There are regular releases, the newest of which can be used by omitting the equal sign and version information on the command line. Historically new versions have lots of changes and a good chance of a bug or five. As a result we will hold the software at the recent but stable version we install.
+# In a later lab we will update the cluster to a newer version.
 K8S_EXACT_VERSION=$(apt-cache madison kubectl | grep $K8S_MAJOR_VERSION | head -1 | awk '{print $3}')
 
 apt-get install -y kubeadm=$K8S_EXACT_VERSION kubelet=$K8S_EXACT_VERSION kubectl=$K8S_EXACT_VERSION
@@ -106,10 +104,7 @@ apt-mark hold kubelet kubeadm kubectl
 
 ```
 
-</details>
-
-
-## calico prerequisite
+## Calico prerequisites
 
 https://docs.tigera.io/calico/latest/operations/troubleshoot/troubleshooting#configure-networkmanager
 
@@ -126,60 +121,47 @@ sudo bash -c 'cat > /etc/NetworkManager/conf.d/calico.conf <<EOF
 [keyfile]
 unmanaged-devices=interface-name:cali*;interface-name:tunl*;interface-name:vxlan.calico;interface-name:vxlan-v6.calico;interface-name:wireguard.cali;interface-name:wg-v6.cali
 EOF'
-
-
 ```
 
-## init the first cluster master
+</details>
 
+## Init the first cluster master
 
 ```sh
-
 # connect to master-0
 ssh master-0
 
-# optionnal :
-# sudo kubeadm config images pull
-# this config depends on CNI, we use Calico --pod-network-cidr=192.168.0.0/16 
-sudo kubeadm init --pod-network-cidr=192.168.0.0/16
+# /!\ You MUST change <YOUR-UNIQUE-NUMBER> before !!
+sudo kubeadm init --pod-network-cidr=192.168.0.0/16 --control-plane-endpoint "k8s-api.k8s-sec-<YOUR-UNIQUE-NUMBER>.wescaletraining.fr:6443" --upload-certs
+# /!\ SAVE THE TWO OUTPUTED COMMANDS
+# They will be used by other nodes to join the cluster
 
-# allow k8s api acces from current user
+# Allow k8s api access from current user
 mkdir -p $HOME/.kube
 sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
 sudo chown $(id -u):$(id -g) $HOME/.kube/config
 
+# You should now see your cluster with a single master node
+kubectl get nodes
 
-# auto completion
+
+# Add auto completion
 echo "source <(kubectl completion bash)" >> $HOME/.bashrc
 echo "alias k=kubectl" >> $HOME/.bashrc
 echo "complete -o default -F __start_kubectl k" >> $HOME/.bashrc
 source $HOME/.bashrc
-
-
-    Then you can join any number of worker nodes by running the following on each as root:
-
-    kubeadm join 10.124.1.7:6443 --token 7l7l2c.d4rftkr3i6fro1fh \
-            --discovery-token-ca-cert-hash sha256:0ca8a6bbc11fe3a91f8fcd21076153fc6247395a098134f934d5096a5d896bcd
-            
 ```
 
-Save the kubeadm join command with the --token and --discovery-token-ca-cert-hash
-
-### install Calico
-
-
-https://docs.tigera.io/calico/latest/getting-started/kubernetes/quickstart#install-calico
-
+### Install Calico
 
 ```sh
-
-# 1. Install the Tigera Calico operator and custom resource definitions.
+# Install the Tigera Calico operator and custom resource definitions.
 kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.26.3/manifests/tigera-operator.yaml
 
-# 2. Install Calico by creating the necessary custom resource.
+# Install Calico by creating the necessary custom resource.
 kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.26.3/manifests/custom-resources.yaml
 
-# 3. Confirm that all of the pods are running with the following command. Wait until each pod has the STATUS of Running.
+# Confirm that all of the pods are running with the following command. Wait until each pod has the STATUS of Running.
 watch kubectl get pods -n calico-system
     NAME                                       READY   STATUS    RESTARTS   AGE
     calico-kube-controllers-8595fcb4f6-dhn64   1/1     Running   0          2m6s
@@ -189,10 +171,22 @@ watch kubectl get pods -n calico-system
 
 ```
 
-## Add master
+## Master nodes
 
+**Execute these commands on master-1 and master-2**
 
-## Add worker node
+Use the command displayed during init phase, with your own tokens !
+
+```sh
+    kubeadm join k8s-api.k8s-sec-0.wescaletraining.fr:6443:6443 --token 9vr73a.a8uxyaju799qwdjv \
+      --discovery-token-ca-cert-hash sha256:7c2e69131a36ae2a042a339b33381c6d0d43887e2de83720eff5359e26aec866 \
+      --control-plane \
+      --certificate-key f8902e114ef118304e561c3ecd4d0b543adc226b7a07f675f56564185ffe0c07
+```
+
+## Worker nodes
+
+**Execute these commands on worker-0, worker-1 and worker-2**
 
 Use the command displayed during init phase, with your own tokens !
 
@@ -202,16 +196,7 @@ Use the command displayed during init phase, with your own tokens !
 
 ```
 
-By default join token is only valid for 24 hours
-
-Error message if invalid token
-
-```sh
-sudo kubeadm join 10.124.1.7:6443 --token 7l7l2c.d4rftkr3i6fro1fh \
->             --discovery-token-ca-cert-hash sha256:0ca8a6bbc11fe3a91f8fcd21076153fc6247395a098134f934d5096a5d896bcd
-[preflight] Running pre-flight checks
-error execution phase preflight: couldn't validate the identity of the API Server: could not find a JWS signature in the cluster-info ConfigMap for token ID "7l7l2c"
-```
+**/!\ By default join token is only valid for 24 hours. If it has expired run the following command from the master-0 to generate a new one**
 
 ```sh
 kubeadm token create --print-join-command
@@ -219,4 +204,14 @@ kubeadm token create --print-join-command
 kubeadm token list
 TOKEN                     TTL         EXPIRES                USAGES                   DESCRIPTION                                                EXTRA GROUPS
 12ytiu.8d4iqxdn92wt07gp   23h         2023-10-31T07:46:37Z   authentication,signing   <none>                                                     system:bootstrappers:kubeadm:default-node-token
+```
+
+## Retrieve kubeconfig
+
+Go back to the bastion and retrieve the cluster kubeconfig file
+
+```sh
+mkdir -p ~/.kube/config
+
+scp -F provided_ssh_config master-0:/home/training/.kube/config ~/.kube
 ```
