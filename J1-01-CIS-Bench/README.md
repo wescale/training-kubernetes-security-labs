@@ -1,4 +1,6 @@
-# Connect to SSH
+# Lab 01 - OS CIS Benchmark
+
+## Connect to SSH
 
 
 At this stage, you get a cluster with the control plane initialized with RKE2, but the cluster has no worker.
