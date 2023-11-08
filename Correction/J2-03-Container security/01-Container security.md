@@ -48,6 +48,10 @@ helm repo add aqua https://aquasecurity.github.io/helm-charts/
 
 helm install trivy-operator aqua/trivy-operator \
   --namespace trivy-system \
+  --set trivyOperator.scanJobTolerations[0].key="node-role.kubernetes.io/control-plane"  \
+  --set trivyOperator.scanJobTolerations[0].operator="Equal" \
+  --set trivyOperator.scanJobTolerations[0].value="" \
+  --set trivyOperator.scanJobTolerations[0].effect="NoSchedule" \
   --create-namespace
 ```
 
