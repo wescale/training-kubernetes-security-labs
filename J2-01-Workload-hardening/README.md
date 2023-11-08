@@ -166,23 +166,20 @@ Strict
 <details>
 
 ```sh
-ssh -F provided_ssh_config worker-0 sudo mkdir -p /var/lib/kubelet/seccomp/profiles || true
-ssh -F provided_ssh_config worker-1 sudo mkdir -p /var/lib/kubelet/seccomp/profiles || true
-ssh -F provided_ssh_config worker-2 sudo mkdir -p /var/lib/kubelet/seccomp/profiles || true
+sudo mkdir -p /var/lib/kubelet/seccomp/profiles
 
-scp -F provided_ssh_config violation.json worker-0:/home/training/
-scp -F provided_ssh_config violation.json worker-1:/home/training/
-scp -F provided_ssh_config violation.json worker-2:/home/training/
+echo "
+{
+    \"defaultAction\": \"SCMP_ACT_ERRNO\"
+}
+" | sudo tee /var/lib/kubelet/seccomp/profiles/violation.json 
 
+echo "
+{
+    \"defaultAction\": \"SCMP_ACT_LOG\"
+}
+" | sudo tee /var/lib/kubelet/seccomp/profiles/audit.json 
 
-ssh -F provided_ssh_config worker-0 sudo cp -i /home/training/violation.json /var/lib/kubelet/seccomp/profiles/
-ssh -F provided_ssh_config worker-1 sudo cp -i /home/training/violation.json /var/lib/kubelet/seccomp/profiles/
-ssh -F provided_ssh_config worker-2 sudo cp -i /home/training/violation.json /var/lib/kubelet/seccomp/profiles/
-
-
-ssh -F provided_ssh_config worker-0 sudo ls -al /var/lib/kubelet/seccomp/profiles/
-ssh -F provided_ssh_config worker-1 sudo ls -al  /var/lib/kubelet/seccomp/profiles/
-ssh -F provided_ssh_config worker-2 sudo ls -al  /var/lib/kubelet/seccomp/profiles/
 ```
 
 </details>
@@ -207,6 +204,31 @@ spec:
       securityContext:
         seccompProfile:
           type: Localhost
+          localhostProfile: profiles/violation.json
+      containers:
+      - image: hashicorp/http-echo:1.0
+        args:
+        - "-text=just made some more syscalls!"
+        name: ubuntu
+        securityContext:
+          allowPrivilegeEscalation: false
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: ubuntu-seccomp-audit
+spec:
+  selector:
+      matchLabels:
+        name: ubuntu-seccomp-audit
+  template:
+    metadata:
+      labels:
+        name: ubuntu-seccomp-audit
+    spec:
+      securityContext:
+        seccompProfile:
+          type: Localhost
           localhostProfile: profiles/audit.json
       containers:
       - image: hashicorp/http-echo:1.0
@@ -217,9 +239,15 @@ spec:
           allowPrivilegeEscalation: false
 ```
 
+check on worker-0
+
+```sh
+sudo tail -f /var/log/syslog | grep 'http-echo'
+```
+
 ## AppArmor Configuration
 
-Create an profile
+Create an profile on workers
 
 ```sh
 sudo apparmor_parser -q <<EOF

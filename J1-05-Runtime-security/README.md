@@ -2,12 +2,12 @@
 
 ## Runtime configuration
 
-### Install Runtime runsc on all workers
+### Install Runtime runsc on worker-0
 
 Script install/build containerd-shim-runsc-v1
 
 ```sh
-#! /usr/bin/env bash
+#!/usr/bin/env bash
 
 set -e
 
@@ -33,6 +33,8 @@ Edit and add runsc runtime to containerd
 [plugins."io.containerd.grpc.v1.cri".containerd.runtimes.runsc]
     runtime_type = "io.containerd.runsc.v1"
 ```
+
+Restart containerd runtime
 
 ### Run a pod with gVisor Runtime
 
@@ -171,6 +173,7 @@ kubectl logs -l app.kubernetes.io/name=falco -n falco -c falco | grep Notice
 > https://falco.org/docs/reference/rules/default-rules/
 
 ### Adds
+
 <details>
 
 [About gvisor](https://github.com/falcosecurity/charts/tree/master/charts/falco#about-gvisor)

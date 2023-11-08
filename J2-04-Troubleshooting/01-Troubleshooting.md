@@ -16,3 +16,8 @@ The only indications you have is that issues are coming from the `front-office` 
 Your mission, if you accept it (you don't really have the choice) is to investigate and do what is necessary to adress these issues.
 
 Don't hesitate to make use of all that you've seen during the two previous days, it will help.
+
+## Falco Checks
+
+Create a falco rule that reduce alert on `registry.k8s.io` trust your `frontoffice` to be privileged deployment alert
+
