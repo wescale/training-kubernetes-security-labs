@@ -126,6 +126,7 @@ spec:
     spec:
       securityContext:
         fsGroup: 20000
+        runAsUser: 10001
         runAsGroup: 20000
         supplementalGroups: [20000]
       containers:
