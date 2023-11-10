@@ -40,3 +40,48 @@ List of things to fix:
 > `back-office` deployment security context can be more secure. **Fix `runAsUser`, `allowPrivilegeEscalation` and `readOnlyRootFilesystem`**
 
 > The `csi clustercompliancereport` resource reports fails. Fix them
+
+```sh
+kubectl get compliance cis -o=jsonpath='{.status}' | jq '.summaryReport.controlCheck[] | select(.severity=="CRITICAL")| select(.totalFail>0)'
+```
+
+## Falco Check
+
+
+### Install Falco
+
+Download helm chart
+
+```sh
+helm repo add falcosecurity https://falcosecurity.github.io/charts
+helm repo update
+```
+
+Install falco
+
+```sh
+kubectl create namespace falco
+
+helm install falco -n falco --set driver.kind=ebpf --set tty=true falcosecurity/falco
+```
+
+```yaml
+customRules:
+  rules-container-privileged.yaml: |-
+    - list: trusted_images
+      items: [docker.io/hashicorp/http-echo, docker.io/calico/node, docker.io/falcosecurity/falco-no-driver, docker.io/calico/node-driver-registrar, docker.io/calico/csi]
+
+    - rule: Launch Privileged Container
+      desc: Detect the start of a privileged container. Exceptions are made for known trusted images.
+      condition: >
+        container
+        and container.privileged=true
+        and not ( container.image.repository in (trusted_images) or
+                  container.image.repository startswith registry.k8s.io/ )
+      output: Privileged container
+      priority: alert
+```
+
+```sh
+helm upgrade falco -n falco -f custom-rules.yaml --set driver.kind=ebpf --set tty=true falcosecurity/falco
+```
