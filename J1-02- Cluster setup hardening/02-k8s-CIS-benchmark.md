@@ -7,7 +7,7 @@ You can perform CIS Benchmark over K8S cluster with several tools. Aqua Security
 
 ## kube-bench
 
-### install kube-bench
+Kube-bench is allready installed 
 
 ```sh
 export KUBE_BENCH_VERSION=0.6.19
