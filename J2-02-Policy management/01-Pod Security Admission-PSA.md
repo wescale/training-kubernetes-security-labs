@@ -132,6 +132,6 @@ kubectl create deployment container-demo --replicas=2 --image=damaumenee/contain
     deployment.apps/container-demo created
 
 # check pod
-kubectl get pod -n my-baseline-namespace
+kubectl get pod -n my-restricted-namespace
 
 ```
