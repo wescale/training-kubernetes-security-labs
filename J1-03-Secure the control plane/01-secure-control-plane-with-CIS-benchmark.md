@@ -1,5 +1,7 @@
 # Hardening controle plan according CIS
 
+se connecter à la machine master-0
+
 ```
 [INFO] 1 Control Plane Security Configuration
 [INFO] 1.1 Control Plane Node Configuration Files

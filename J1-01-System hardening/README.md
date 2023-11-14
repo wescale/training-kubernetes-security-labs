@@ -76,9 +76,9 @@ sudo apt-get install -y docker-ce docker-ce-cli containerd.io
 
 sudo usermod -aG docker training # Relaunch the ssh session
 
-sudo docker run -d -p 80:80 -v /var/www/html:/usr/share/nginx/html -n nginx nginx 
+sudo docker run -d -p 80:80 -v /var/www/html:/usr/share/nginx/html --name nginx nginx 
 
-echo "open: http://bastion.k8s-sec-wsc-k8s-security-0.wescaletraining.fr"
+echo "open: http://bastion.k8s-sec-<YOUR-ENV-NUMBER>.wescaletraining.fr"
 ```
 
 Then launch CIS bench mark

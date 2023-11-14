@@ -100,6 +100,22 @@ kubectl exec -it ubuntu-gvisor-xxxxx -- bash
 
 ## Runtime checks
 
+se connecter sur le bastion (vm bastion-0)
+
+### Install Helm
+
+```sh
+curl https://baltocdn.com/helm/signing.asc | gpg --dearmor | sudo tee /usr/share/keyrings/helm.gpg > /dev/null
+sudo apt-get install apt-transport-https --yes
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/helm.gpg] https://baltocdn.com/helm/stable/debian/ all main" | sudo tee /etc/apt/sources.list.d/helm-stable-debian.list
+sudo apt-get update
+sudo apt-get install helm
+
+# check
+helm version
+
+```
+
 ### Install Falco
 
 Download helm chart
@@ -122,7 +138,6 @@ Simulate suspicious activity
 Generate a pod and activity
 
 ```sh
-kubectl run ubuntu --image ubuntu -- bash -c "sleep infinity"
 kubectl exec -it ubuntu -- bash -c "uptime"
 ```
 
@@ -136,6 +151,8 @@ kubectl logs -l app.kubernetes.io/name=falco -n falco -c falco | grep Notice
 
 Custom rule on ssh connection
 
+create a file named ```custom-rules.yaml``` with following content :
+
 ```yaml
 customRules:
   rules-ssh.yaml: |-
@@ -145,7 +162,7 @@ customRules:
         evt.type = accept and
         evt.dir = < and
         proc.name = sshd and
-        fd.cip != "10.124.0.2"
+        fd.cip != "10.124.0.99"
       output: >
         SSH attempt by non-allowlisted client
         (client=%fd.cip
