@@ -2,6 +2,8 @@
 
 ## Configure the built-in Admission Controller
 
+connect to master-0
+
 ### Create a yaml config file with this content
 
 ```sh
@@ -93,10 +95,11 @@ metadata:
     pod-security.kubernetes.io/audit: restricted
     pod-security.kubernetes.io/audit-version: latest
     pod-security.kubernetes.io/warn: restricted
-    pod-security.kubernetes.io/warn-version:latest
+    pod-security.kubernetes.io/warn-version: latest
 EOF
+```
 
-
+```yaml
 cat <<EOF | kubectl create -f -
 apiVersion: v1
 kind: Namespace
@@ -123,7 +126,7 @@ kubectl create deployment container-demo --replicas=2 --image=damaumenee/contain
     deployment.apps/container-demo created
 
 # check pod
-kubectl get pod -n my-baseline-namespace
+kubectl get all -n my-baseline-namespace
 
 # create a deployment in my-restricted-namespace
 kubectl create deployment container-demo --replicas=2 --image=damaumenee/container-demo:1.0 -n my-restricted-namespace
@@ -131,7 +134,12 @@ kubectl create deployment container-demo --replicas=2 --image=damaumenee/contain
     Warning: would violate PodSecurity "restricted:v1.27": allowPrivilegeEscalation != false (container "container-demo" must set securityContext.allowPrivilegeEscalation=false), unrestricted capabilities (container "container-demo" must set securityContext.capabilities.drop=["ALL"]), runAsNonRoot != true (pod or container "container-demo" must set securityContext.runAsNonRoot=true), seccompProfile (pod or container "container-demo" must set securityContext.seccompProfile.type to "RuntimeDefault" or "Localhost")
     deployment.apps/container-demo created
 
-# check pod
-kubectl get pod -n my-baseline-namespace
+# check all resources in my-restricted-namespace
+kubectl get all -n my-restricted-namespace
 
+# decribe deployment
+kubectl describe deployment -n my-restricted-namespace container-demo
+
+# describe replicaset
+kubectl describe replicaset -n my-restricted-namespace container-demo
 ```
